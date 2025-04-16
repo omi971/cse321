@@ -1,3 +1,4 @@
+// this code giving output concurrently
 #include <stdio.h>
 #include <pthread.h>
 #include <unistd.h> // for sleep function
@@ -20,7 +21,7 @@ int main(){
 
     pthread_t thread1;
     pthread_create(&thread1, NULL, block, NULL);
-    // 1st_param --> thread initialization
+    // 1st_param --> which thread we want to create
     // 3rd_param --> thread will be run on that function
     default_thread();
     pthread_join(thread1, NULL); // waits for the thread1 to finish

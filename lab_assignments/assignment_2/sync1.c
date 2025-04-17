@@ -12,10 +12,10 @@ void *func(void* arg){
     int num = *(int*)arg;
     printf("Entered Thread: %d\n", num);
     
-    for(int i = 0; i < 100000; i++){
+    for(int i = 0; i < 10000000; i++){
         sem_wait(&s); // wait for the semaphore, Here the value will be 0, So IF thread 2 comes in it can not access the 
-        // count variable, since semaphore vallue is 0. It is stuck in a while loop. When thread 1 calls post only then thread 2
-        // come and access the count variable
+        // count variable, since semaphore vallue is 0. It is stuck in a while loop busy waiting. 
+        // When thread 1 calls post only then thread 2 come and access the count variable
         count++;
         sem_post(&s); // signal the semaphore, Here the value will be 1
     }

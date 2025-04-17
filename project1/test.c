@@ -1,22 +1,51 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <limits.h>
+#include <linux/limits.h>
 #include <stdlib.h>
 #include <string.h>
 #include <signal.h>
-#include <linux/limits.h>
+#define HISTORY_SIZE 50
 
-#define MAX_INPUT 1000
+
+
+int nothing = 0;
+
+// ===========================================================
+char* history[HISTORY_SIZE];
+int history_count = 0;
+
+// Add a command to history
+void add_to_history(const char* cmd) {
+    if (history_count < HISTORY_SIZE) {
+        history[history_count++] = strdup(cmd);
+    } else {
+        // Remove oldest and shift
+        free(history[0]);
+        for (int i = 1; i < HISTORY_SIZE; i++) {
+            history[i - 1] = history[i];
+        }
+        history[HISTORY_SIZE - 1] = strdup(cmd);
+    }
+}
+
+// Display history
+void show_history() {
+    for (int i = 0; i < history_count; i++) {
+        printf("[%d]: %s\n", i + 1, history[i]);
+    }
+}
+// ===========================================================
+
 
 // Handle Ctrl+C (SIGINT)
 void handle_sigint(int sig) {
-    printf("\nCaught Ctrl+C (SIGINT). Exiting the shell.\n");
+    printf("\nCaught Ctrl+C (SIGINT).\nExiting the shell.\n");
     exit(0);
 }
 
-// Get current working directory
 char* get_directory() {
-    char *cwd = malloc(PATH_MAX);
+    char *cwd = malloc(PATH_MAX);  // allocate memory
     if (cwd == NULL) {
         perror("malloc() failed");
         exit(1);
@@ -31,36 +60,41 @@ char* get_directory() {
     }
 }
 
-int main() {
-    signal(SIGINT, handle_sigint);  // Register Ctrl+C handler
-
-    char input[MAX_INPUT];
-
+int main(){
     printf("--------------------------------------\n");
     printf("======================================\n");
     printf("--------------------------------------\n");
     printf("Welcome to the CSE31 Project Shell\n\n");
+    
+    signal(SIGINT, handle_sigint);  // Register Ctrl+C handler
 
-    while (1) {
+    char input[MAX_INPUT];
+
+    while (1){
         char *dir = get_directory();
-        if (dir) {
-            printf("%s$ ", dir);
-            free(dir);
-        }
+        printf("%s$ ", dir);
 
+        // Read input including spaces
         if (fgets(input, sizeof(input), stdin) == NULL) {
+            // If input failed (EOF or error), continue
             continue;
         }
-        input[strcspn(input, "\n")] = '\0'; 
+        input[strcspn(input, "\n")] = '\0';
+        add_to_history(input);
+        printf("You entered the string: %s\n", input); // Just for testing
 
-        if (strcmp(input, "exit") == 0) {
+        // Exiting function
+        if(strcmp(input, "exit") == 0){
             printf("Exiting the shell\n");
             break;
         }
 
-        // Debug: echo the input
-        printf("You entered the string: %s\n", input);
+        if(strcmp(input, "history") == 0){
+            show_history();
+        }
     }
+
+
 
     return 0;
 }

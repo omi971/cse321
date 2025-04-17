@@ -16,6 +16,8 @@ int nothing = 0;
 char* history[HISTORY_SIZE];
 int history_count = 0;
 
+
+// ======================[Task 7]======================
 // Add a command to history
 void add_to_history(const char* cmd) {
     if (history_count < HISTORY_SIZE) {
@@ -39,6 +41,8 @@ void show_history() {
     return; // Ensure no further execution after handling 'history'
 
 }
+// ======================[Task 7]======================
+
 
 // ======================[Task 1 & 2]======================
 pid_t activeChildPid = -1;
@@ -98,12 +102,15 @@ void executeSingleCommand(char **tokens) {
 
 
 
+// ======================[Task 8]======================
 // Handle Ctrl+C (SIGINT)
 void handle_sigint(int sig) {
     printf("\nCaught Ctrl+C (SIGINT).\nExiting the shell.\n");
     exit(0);
 }
+// ======================[Task 8]======================
 
+// ======================[Additional]======================
 char* get_directory() {
     char *cwd = malloc(PATH_MAX);  // allocate memory
     if (cwd == NULL) {
@@ -119,6 +126,8 @@ char* get_directory() {
         return NULL;
     }
 }
+// ======================[Additional]======================
+
 
 int main(){
     printf("--------------------------------------\n");

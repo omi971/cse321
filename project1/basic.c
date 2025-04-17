@@ -10,7 +10,6 @@
 
 
 int nothing = 0;
-
 // ===========================================================
 char* history[HISTORY_SIZE];
 int history_count = 0;
@@ -35,8 +34,6 @@ void show_history() {
         printf("[%d]: %s\n", i + 1, history[i]);
     }
 }
-// ===========================================================
-
 
 // Handle Ctrl+C (SIGINT)
 void handle_sigint(int sig) {

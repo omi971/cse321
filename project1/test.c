@@ -15,6 +15,50 @@
 
 int nothing = 0;
 
+
+
+// ======================[Task - 3 Redirection]======================
+void handle_redirection(char **tokens) {
+    int i = 0;
+    while (tokens[i] != NULL) {
+        if (strcmp(tokens[i], "<") == 0) {
+            // Input redirection
+            FILE *fp = fopen(tokens[i + 1], "r");
+            if (!fp) {
+                perror("Input file open failed");
+                exit(EXIT_FAILURE);
+            }
+            dup2(fileno(fp), STDIN_FILENO);
+            fclose(fp);
+            tokens[i] = NULL;
+        } else if (strcmp(tokens[i], ">") == 0) {
+            // Output redirection (overwrite)
+            FILE *fp = fopen(tokens[i + 1], "w");
+            if (!fp) {
+                perror("Output file open failed");
+                exit(EXIT_FAILURE);
+            }
+            dup2(fileno(fp), STDOUT_FILENO);
+            fclose(fp);
+            tokens[i] = NULL;
+        } else if (strcmp(tokens[i], ">>") == 0) {
+            // Output redirection (append)
+            FILE *fp = fopen(tokens[i + 1], "a");
+            if (!fp) {
+                perror("Output file open (append) failed");
+                exit(EXIT_FAILURE);
+            }
+            dup2(fileno(fp), STDOUT_FILENO);
+            fclose(fp);
+            tokens[i] = NULL;
+        }
+        i++;
+    }
+}
+// ======================[Task - 3 Redirection]======================
+
+
+
 // ======================[Task 1 & 2]======================
 pid_t activeChildPid = -1;
 // #2 Parsing user input
@@ -59,6 +103,7 @@ void executeSingleCommand(char **tokens) {
 
     pid_t pid = fork();
     if (pid == 0) {
+        handle_redirection(tokens);
         execvp(tokens[0], tokens);
         perror("exec failed");
         exit(1);
@@ -70,7 +115,7 @@ void executeSingleCommand(char **tokens) {
 }
 // ======================[Task 1 & 2]======================
 
-// ======================[Task 4 & 5 & 6]======================
+// ======================[Task 6]=== - (;;;; and &&)===================
 void handle_multiple_commands(char *input, char **tokens) {
     char *semicolon_cmds[BUFFER_SIZE];
     int sc_count = 0;
@@ -132,6 +177,7 @@ void handle_multiple_commands(char *input, char **tokens) {
 
                 pid_t pid = fork();
                 if (pid == 0) {
+                    handle_redirection(tokens);
                     execvp(tokens[0], tokens);
                     perror("exec failed");
                     exit(1);
@@ -148,7 +194,7 @@ void handle_multiple_commands(char *input, char **tokens) {
     }
     free(temp);
 }
-// ======================[Task 4 & 5 & 6]======================
+// ======================[Task 5 & 6 - (;;;; and &&)]======================
 
 
 
@@ -185,7 +231,7 @@ void executePipedCommands(char *input) {
             // Tokenize individual command
             char *argv[BUFFER_SIZE / 2];
             parseCommandInput(commands[i], argv);
-
+            handle_redirection(argv);  // ✅ Also support redirection in pipes
             execvp(argv[0], argv);
             perror("execvp failed");
             exit(1);
@@ -257,6 +303,8 @@ char* get_directory() {
     }
 }
 // ======================[Additional]======================
+
+
 
 
 int main(){

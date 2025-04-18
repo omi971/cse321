@@ -3,6 +3,7 @@
         "limits.h": "c",
         "signal.h": "c",
         "stdlib.h": "c",
-        "types.h": "c"
+        "types.h": "c",
+        "string.h": "c"
     }
 }

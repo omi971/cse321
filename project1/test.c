@@ -120,7 +120,7 @@ void handle_multiple_commands(char *input, char **tokens) {
     char *semicolon_cmds[BUFFER_SIZE];
     int sc_count = 0;
 
-    char *temp = strdup(input);  // Copy the input to avoid altering original
+    char *temp = strdup(input);
     char *token = strtok(temp, ";");
     while (token != NULL && sc_count < BUFFER_SIZE) {
         semicolon_cmds[sc_count++] = strdup(token);
@@ -133,7 +133,7 @@ void handle_multiple_commands(char *input, char **tokens) {
 
         token = strtok(semicolon_cmds[i], "&&");
         while (token != NULL && ac_count < BUFFER_SIZE) {
-            and_cmds[ac_count++] = token;  // ✅ Just store the pointer
+            and_cmds[ac_count++] = token;
             token = strtok(NULL, "&&");
         }
 
@@ -231,7 +231,7 @@ void executePipedCommands(char *input) {
             // Tokenize individual command
             char *argv[BUFFER_SIZE / 2];
             parseCommandInput(commands[i], argv);
-            handle_redirection(argv);  // ✅ Also support redirection in pipes
+            handle_redirection(argv);
             execvp(argv[0], argv);
             perror("execvp failed");
             exit(1);

@@ -238,7 +238,7 @@ void handle_sigint(int sig) {
 
 
 
-// ======================[Additional- function like linux terminal]==========
+// ======================[Additional- function like linux terminal]======================
 char* get_directory() {
     char *cwd = malloc(PATH_MAX);  // allocate memory
     if (cwd == NULL) {

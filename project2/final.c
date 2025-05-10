@@ -1,3 +1,6 @@
+// ====================== CSE321 Term Project - 2 ======================
+
+
 #include <stdio.h>
 #include <stdint.h>
 #include <fcntl.h>
@@ -68,22 +71,22 @@ struct vsfs_inode {
     uint32_t indirect;
 };
 
-// Superblock structure (only needed fields)
+
 typedef struct {
-    uint16_t magic;          // 0x00
-    uint32_t block_size;     // 0x02
-    uint32_t total_blocks;   // 0x06
-    uint32_t inode_bitmap;   // 0x0A
-    uint32_t data_bitmap;    // 0x0E
-    uint32_t inode_table_start; // 0x12
-    uint32_t data_block_start;// 0x16
-    uint32_t inode_size;     // 0x1A
-    uint32_t inode_count;    // 0x1E
-    // ... reserved
+    uint16_t magic;          
+    uint32_t block_size;     
+    uint32_t total_blocks;   
+    uint32_t inode_bitmap;   
+    uint32_t data_bitmap;    
+    uint32_t inode_table_start;
+    uint32_t data_block_start;
+    uint32_t inode_size;     
+    uint32_t inode_count;    
+
 } __attribute__((packed)) superblock_t;
 
 
-// Inode structure (only relevant fields)
+
 typedef struct {
     uint32_t mode;
     uint32_t uid;
@@ -95,11 +98,10 @@ typedef struct {
     uint32_t dtime;
     uint32_t links_count;
     uint32_t blocks_count;
-    uint32_t direct_block;  // We'll just check the direct pointer here.
+    uint32_t direct_block;
     uint32_t single_indirect;
     uint32_t double_indirect;
     uint32_t triple_indirect;
-    // ... reserved[156]
 } __attribute__((packed)) inode_t;
 
 
@@ -123,7 +125,7 @@ bool read_block(int fd, int block_num, void *buffer) {
 
 int get_bitmap_bit(uint8_t *bitmap, int bit_index) {
     int byte_index = bit_index / 8;
-    int bit_offset = 7 - (bit_index % 8);  // Big-endian bit order
+    int bit_offset = 7 - (bit_index % 8);
     return (bitmap[byte_index] >> bit_offset) & 1;
 }
 
@@ -164,7 +166,7 @@ void check_data_bitmap_consistency(int fd) {
     for (int i = 0; i < DATA_BLOCK_COUNT; i++) {
         int bitmap_val = get_bitmap_bit(bitmap_block, i);
         if (bitmap_val && !block_used_by_inode[i]) {
-            printf("❌ Block %d marked USED in bitmap but not used by any inode\n", i + DATA_BLOCK_START);
+            printf("Block %d marked USED in bitmap but not used by any inode\n", i + DATA_BLOCK_START);
             consistent = false;
         }
     }
@@ -172,13 +174,13 @@ void check_data_bitmap_consistency(int fd) {
     for (int i = 0; i < DATA_BLOCK_COUNT; i++) {
         int bitmap_val = get_bitmap_bit(bitmap_block, i);
         if (block_used_by_inode[i] && !bitmap_val) {
-            printf("❌ Block %d used by inode but marked FREE in bitmap\n", i + DATA_BLOCK_START);
+            printf("Block %d used by inode but marked FREE in bitmap\n", i + DATA_BLOCK_START);
             consistent = false;
         }
     }
 
     if (consistent) {
-        printf("✅ Data bitmap is consistent with inode references!\n");
+        printf("Data bitmap is consistent with inode references!\n");
     }
 }
 
@@ -208,19 +210,19 @@ void check_duplicate_blocks(int fd) {
         }
     }
 
-    // Report duplicates
+
     printf("\n=== Duplicate Block Checker ===\n");
     int duplicates_found = 0;
 
     for (int i = 0; i < DATA_BLOCK_COUNT; i++) {
         if (block_usage_count[i] > 1) {
-            printf("❌ Block %d is referenced by %d inodes (DUPLICATE)\n", i + DATA_BLOCK_START, block_usage_count[i]);
+            printf("Block %d is referenced by %d inodes (DUPLICATE)\n", i + DATA_BLOCK_START, block_usage_count[i]);
             duplicates_found++;
         }
     }
 
     if (duplicates_found == 0) {
-        printf("✅ No duplicate data block references found.\n");
+        printf("No duplicate data block references found.\n");
     }
 }
 
@@ -438,7 +440,6 @@ int validate_superblock(FILE *fd, superblock_t* sb) {
 }
 
 // --------------------------------- Task - 5 ------------------------------
-
 void bad_block_checker(FILE *fd, superblock_t* sb) {
     printf("\nBad Block Checker:\n");
 
@@ -454,15 +455,12 @@ void bad_block_checker(FILE *fd, superblock_t* sb) {
 
         inode_t* inode = (inode_t*) buffer;
 
-        // Check only valid inodes: link count > 0 and dtime == 0
         if (inode->links_count > 0 && inode->dtime == 0) {
-            // Check direct block
             uint32_t block = inode->direct_block;
             if(block != 0 && (block < DATA_BLOCK_START || block > DATA_BLOCK_END)) {
                 printf("  [ERROR] Inode %u references bad block %u (valid range: %d-%d)\n", i, block, DATA_BLOCK_START, DATA_BLOCK_END);
                 bad_blocks_found = 1;
             }
-            // TODO: You can check indirect blocks similarly!
         }
     }
     if(!bad_blocks_found) printf("  No bad blocks detected!\n");
@@ -476,14 +474,12 @@ int main(int argc, char *argv[]) {
 
     const char *image_path = argv[1];
 
-    // ✅ Open with fopen to get FILE*
     FILE *fp = fopen(image_path, "r+b");
     if (!fp) {
         perror("Error opening image");
         return EXIT_FAILURE;
     }
 
-    // ✅ Convert FILE* to int fd when needed (e.g., for read())
     int fd = fileno(fp);
 
     // Task - 1: Superblock
